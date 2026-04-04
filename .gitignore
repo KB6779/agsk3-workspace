@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+output/
+tools/agsk.db
+tools/migrate_to_supabase.py
+tools/create_stamp_ref.py
+tools/stamp_templates.xlsx
+catalog/
+*.tar.gz
+.claude/

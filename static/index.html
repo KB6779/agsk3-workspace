@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АГСК-3 — Рабочее место</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pri:#1E40AF;--pri-h:#1E3A8A;--pri-l:#DBEAFE;--pri-xl:#EFF6FF;
+  --sec:#059669;--sec-l:#D1FAE5;
+  --warn:#D97706;--warn-l:#FEF3C7;
+  --err:#DC2626;--err-l:#FEE2E2;
+  --g50:#F8FAFC;--g100:#F1F5F9;--g200:#E2E8F0;--g300:#CBD5E1;
+  --g400:#94A3B8;--g500:#64748B;--g600:#475569;--g700:#334155;--g800:#1E293B;--g900:#0F172A;
+  --white:#FFF;--radius:8px;
+  --shadow:0 1px 4px rgba(0,0,0,.06);
+  --font:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --tr:150ms ease;
+}
+body{font-family:var(--font);background:var(--g100);color:var(--g800);min-height:100vh;display:flex;flex-direction:column}
+.ico{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;vertical-align:middle}
+
+/* ── TOPBAR ── */
+.topbar{height:50px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;padding:0 20px;gap:14px;box-shadow:var(--shadow);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.logo-t{font:700 15px/1 var(--font);color:var(--g900)}
+.logo-s{font:500 11px/1 var(--font);color:var(--g400)}
+.topbar-r{margin-left:auto;display:flex;align-items:center;gap:16px}
+.topbar-r .stat{font:500 12px/1 var(--font);color:var(--g500)}
+.topbar-r .stat b{color:var(--g800)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:260px;flex-shrink:0;background:var(--white);border-right:1px solid var(--g200);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.main{flex:1;overflow-y:auto;padding:20px 28px 40px}
+
+/* ── SIDEBAR ── */
+.sb-hd{font:700 10px/1 var(--font);text-transform:uppercase;letter-spacing:.6px;color:var(--g400);margin-bottom:8px}
+.stat-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}
+.stat-k{color:var(--g500)}.stat-v{font-weight:600}
+.btn-gen{width:100%;padding:12px;border-radius:var(--radius);background:linear-gradient(135deg,var(--pri),#3B82F6);color:var(--white);border:none;cursor:pointer;font:700 13px/1 var(--font);box-shadow:0 2px 8px rgba(30,64,175,.25);transition:opacity var(--tr);margin-top:4px}
+.btn-gen:hover:not(:disabled){opacity:.9}.btn-gen:disabled{opacity:.4;cursor:not-allowed}
+.btn-alt{width:100%;padding:10px;border-radius:var(--radius);background:var(--pri-xl);color:var(--pri);border:1.5px solid var(--pri-l);cursor:pointer;font:600 12px/1 var(--font);transition:background var(--tr)}
+.btn-alt:hover:not(:disabled){background:var(--pri-l)}.btn-alt:disabled{opacity:.4;cursor:not-allowed}
+.pipe{display:flex;flex-direction:column;gap:5px}
+.ps{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--g400)}
+.ps-d{width:9px;height:9px;border-radius:50%;border:2px solid var(--g300);flex-shrink:0}
+.ps.on .ps-d{background:var(--pri);border-color:var(--pri)}.ps.on{color:var(--pri);font-weight:600}
+
+/* ── SEARCH ROW ── */
+.search-row{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--g200);border-radius:var(--radius);padding:8px 12px;margin-bottom:16px;position:relative;box-shadow:var(--shadow)}
+.search-row:focus-within{border-color:var(--pri)}
+.search-row input{flex:1;border:none;outline:none;font:400 14px/1.4 var(--font);background:none;color:var(--g800)}
+.search-row input::placeholder{color:var(--g400)}
+.search-row select{border:1.5px solid var(--g200);border-radius:6px;padding:5px 8px;font:600 11px/1 var(--font);cursor:pointer;outline:none;color:var(--g600);background:var(--g50)}
+.search-row .btn-add{background:var(--pri);color:var(--white);border:none;border-radius:6px;padding:7px 14px;font:600 12px/1 var(--font);cursor:pointer;white-space:nowrap;transition:background var(--tr)}
+.search-row .btn-add:hover{background:var(--pri-h)}
+.filter-sel{width:100%;padding:8px 10px;border:1.5px solid var(--g200);border-radius:var(--radius);font:500 12px/1.3 var(--font);cursor:pointer;outline:none;background:var(--white);color:var(--g700);transition:border-color var(--tr);box-shadow:var(--shadow)}
+.filter-sel:focus{border-color:var(--pri)}
+/* catalog dropdown */
+.cat-drop{display:none;position:fixed;z-index:600;
+  background:var(--white);border:1.5px solid #93C5FD;border-radius:var(--radius);
+  box-shadow:0 12px 40px rgba(0,0,0,.18);max-height:420px;overflow-y:auto;
+  width:750px;max-width:92vw}
+.cat-drop.open{display:block}
+.cat-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--g100);
+  display:flex;gap:10px;align-items:baseline;transition:background .1s;line-height:1.35}
+.cat-item:last-child{border-bottom:none}
+.cat-item:hover{background:var(--pri-xl)}
+.cat-item .ci-code{font:700 10px/1 var(--mono);color:var(--pri);white-space:nowrap;min-width:110px;flex-shrink:0}
+.cat-item .ci-name{font-size:12px;color:var(--g800);word-break:break-word}
+.cat-item .ci-unit{font-size:11px;color:var(--g400);white-space:nowrap;flex-shrink:0;margin-left:auto}
+.cat-item.head{background:var(--g50);font-weight:600;color:var(--g700);font-size:11px;padding:6px 12px;position:sticky;top:0;z-index:1;border-bottom:1px solid var(--g200)}
+.cat-nil{padding:16px;text-align:center;color:var(--g400);font-size:12px}
+/* autocomplete */
+.ac{position:absolute;top:100%;left:0;right:0;z-index:500;background:var(--white);border:1.5px solid #93C5FD;border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,.12);max-height:280px;overflow-y:auto;margin-top:3px;display:none}
+.ac.open{display:block}
+.ac-r{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--g100);display:flex;gap:10px;align-items:flex-start;transition:background .1s}
+.ac-r:last-child{border-bottom:none}.ac-r:hover{background:var(--pri-xl)}
+.ac-code{font:700 11px/1 var(--mono);color:var(--pri);min-width:100px}
+.ac-nm{flex:1;font-size:12px;line-height:1.3}.ac-mt{font-size:11px;color:var(--g400)}
+
+/* ── ITEMS TABLE ── */
+.group-hd{font:700 12px/1 var(--font);text-transform:uppercase;letter-spacing:.5px;color:var(--g600);padding:12px 0 6px;border-bottom:2px solid var(--g200);margin-top:16px}
+.group-hd:first-child{margin-top:0}
+table.items{width:100%;border-collapse:collapse;font-size:13px;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:8px}
+table.items thead{background:var(--g50);border-bottom:1px solid var(--g200)}
+table.items th{text-align:left;padding:9px 10px;font:600 10px/1 var(--font);text-transform:uppercase;letter-spacing:.5px;color:var(--g500);white-space:nowrap}
+table.items td{padding:10px;border-bottom:1px solid var(--g100);vertical-align:middle}
+table.items tr:hover{background:var(--g50)}
+.c-pos{width:36px;text-align:center;font-weight:700;color:var(--g500)}
+.c-name{font-weight:500;color:var(--g800);max-width:400px}
+.c-mark{font:700 11px/1 var(--mono);color:var(--pri);white-space:nowrap}
+.c-brand{color:var(--g600);font-size:12px}
+.c-unit{text-align:center;color:var(--g500);width:60px}
+.c-qty{width:120px}
+.qty-i{display:flex;align-items:center;gap:3px}
+.qty-i button{width:24px;height:24px;border-radius:5px;border:1px solid var(--g200);background:var(--white);cursor:pointer;font:700 14px/1 var(--font);color:var(--pri);display:flex;align-items:center;justify-content:center}
+.qty-i button:hover{background:var(--pri-xl)}
+.qty-n{width:44px;text-align:center;border:1px solid var(--g200);border-radius:5px;padding:3px;font:600 12px/1 var(--font);outline:none}
+.c-act{width:32px;text-align:center}
+.del{background:none;border:none;cursor:pointer;color:var(--g400);padding:3px;border-radius:4px;line-height:1;transition:all var(--tr)}
+.del:hover{color:var(--err);background:var(--err-l)}
+.empty{text-align:center;padding:60px 20px;color:var(--g400);font-size:13px;line-height:1.6}
+
+/* ── STAMP ГОСТ 21.1101-2009 Форма 5 ── */
+.stamp{margin-top:32px}
+.stamp h3{font:600 13px/1 var(--font);color:var(--g700);margin-bottom:10px}
+.st{border-collapse:collapse;border:2px solid #000;font:400 10px/1.2 'Times New Roman',serif}
+.st td{border:1px solid #000;padding:2px 4px;vertical-align:middle;height:20px}
+.st .h{font-weight:700;text-align:center;font-size:8px;background:#f5f5f5}
+.st .l{font-weight:700;white-space:nowrap;font-size:9px;width:52px}
+.st .c{text-align:center}
+.st .p{text-align:center;font-size:9px;line-height:1.25;vertical-align:middle}
+.st input{width:100%;border:none;background:transparent;font:400 10px/1.1 'Times New Roman',serif;padding:0 2px;outline:none;color:#000}
+.st input:focus{background:#E8F0FE}
+.st input::placeholder{color:#999;font-style:italic}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--g900);color:var(--white);padding:10px 20px;border-radius:10px;font:500 13px/1.4 var(--font);z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--g300);border-top-color:var(--pri);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <img src="/logo.png" alt="KB">
+    <div><div class="logo-t">АГСК-3</div><div class="logo-s">Рабочее место · Март 2026</div></div>
+  </div>
+  <div class="topbar-r">
+    <span class="stat">Позиций: <b id="tCnt">0</b></span>
+    <span class="stat">Каталог: <b>234 291</b></span>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="sb-hd">Проект</div>
+      <div class="stat-row"><span class="stat-k">Дата</span><span class="stat-v" id="sDate"></span></div>
+      <div class="stat-row"><span class="stat-k">Позиций</span><span class="stat-v" id="sCnt">0</span></div>
+      <div class="stat-row"><span class="stat-k">Оборудование</span><span class="stat-v" id="sEq">0</span></div>
+    </div>
+    <div>
+      <button class="btn-gen" id="bGen" onclick="genSpec()" disabled>Сформировать спецификацию</button>
+      <button class="btn-alt" id="bClr" onclick="clearAll()" disabled style="margin-top:6px">Очистить всё</button>
+    </div>
+    <div>
+      <div class="sb-hd">Статус</div>
+      <div class="pipe">
+        <div class="ps on" id="ps1"><div class="ps-d"></div>Заполняется</div>
+        <div class="ps" id="ps2"><div class="ps-d"></div>Сформировано</div>
+        <div class="ps" id="ps3"><div class="ps-d"></div>Завершено</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SEARCH: верхняя строка — поиск + тип -->
+    <div class="search-row" style="margin-bottom:8px">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="sQ" type="text" placeholder="Искать в каталоге АГСК-3 и добавить в спецификацию..." oninput="onSearch()" autocomplete="off" style="flex:1">
+      <select id="sType"><option>Оборудование</option><option>Изделия</option><option>Материалы</option></select>
+      <div class="ac" id="acDrop"></div>
+    </div>
+    <!-- SEARCH: нижняя строка — раздел + группа + каталог (фиксированные) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <select id="sSec" onchange="loadSGrp();loadSub();onSearch()" class="filter-sel"><option value="">— Раздел АГСК-3 —</option></select>
+      <select id="sGrp" onchange="loadSub();onSearch()" class="filter-sel"><option value="">— Группа —</option></select>
+      <div style="position:relative;flex:1">
+        <input id="sSubQ" class="filter-sel" placeholder="— Выбрать из каталога —" onclick="toggleCat()" oninput="filterCat()" autocomplete="off" style="cursor:pointer">
+        <div class="cat-drop" id="catDrop"></div>
+      </div>
+    </div>
+
+    <!-- ITEMS -->
+    <div id="area">
+      <div class="empty">Спецификация пуста. Введите наименование оборудования в строке поиска выше.</div>
+    </div>
+
+    <!-- ═══ ШТАМП ГОСТ 21.1101-2009 Форма 5 (первый лист) ═══ -->
+    <div class="stamp">
+      <h3>Штамп спецификации</h3>
+      <!--
+        Форма 5: 185мм ширина
+        Левая часть: 6 колонок (Изм.10 + Кол.уч.10 + Лист.10 + №док.10 + Подп.15 + Дата.10 = 65мм)
+        Правая часть: проект (70мм) + стадия/лист (15+15+20 = 50мм)
+        Строки: 8 x 5мм = 40мм
+      -->
+      <table class="st" style="width:740px">
+        <colgroup>
+          <col style="width:40px"><!-- Изм. -->
+          <col style="width:40px"><!-- Кол.уч. -->
+          <col style="width:40px"><!-- Лист -->
+          <col style="width:40px"><!-- № док. -->
+          <col style="width:60px"><!-- Подпись -->
+          <col style="width:40px"><!-- Дата -->
+          <col style="width:280px"><!-- (5) шифр/наименование 70мм -->
+          <col style="width:60px"><!-- Стадия 15мм -->
+          <col style="width:60px"><!-- Лист 15мм -->
+          <col style="width:80px"><!-- Листов 20мм -->
+        </colgroup>
+        <!-- Строка 1-2: верхняя часть — пустая левая + шифр проекта справа -->
+        <tr>
+          <td colspan="6" rowspan="2" style="border-bottom:none"></td>
+          <td rowspan="2" class="p" style="height:40px"><input id="xCode" placeholder="Шифр проекта" style="text-align:center;font-weight:700;font-size:11px"></td>
+          <td colspan="3" style="border-bottom:none"></td>
+        </tr>
+        <tr>
+          <td colspan="3" class="p"><input id="xName" placeholder="Наименование объекта" style="text-align:center;font-size:10px"></td>
+        </tr>
+        <!-- Строка 3: заголовки (14)-(19) -->
+        <tr>
+          <td class="h">Изм.</td>
+          <td class="h">Кол.уч.</td>
+          <td class="h">Лист</td>
+          <td class="h">№ док.</td>
+          <td class="h">Подпись</td>
+          <td class="h">Дата</td>
+          <td rowspan="2" class="p" style="font-size:10px"><input id="xCodeN" placeholder="(1) Обозначение документа" style="text-align:center;font-size:9px"></td>
+          <td class="h">Стадия</td>
+          <td class="h">Лист</td>
+          <td class="h">Листов</td>
+        </tr>
+        <!-- Строка 4: Разраб. -->
+        <tr>
+          <td class="l">Разраб.</td>
+          <td class="c"><input id="xDev" placeholder=""></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="c"><input id="xDevD" placeholder="04.26" style="width:40px"></td>
+          <td class="c" rowspan="2"><input id="xStg" value="РП" style="text-align:center;font-weight:700"></td>
+          <td class="c" rowspan="2"><input id="xSh" value="1" style="text-align:center"></td>
+          <td class="c" rowspan="2"><input id="xShT" value="1" style="text-align:center"></td>
+        </tr>
+        <!-- Строка 5: Проверил -->
+        <tr>
+          <td class="l">Проверил</td>
+          <td class="c"><input id="xChk" placeholder=""></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="c"><input id="xChkD" placeholder="04.26" style="width:40px"></td>
+          <td rowspan="3" class="p" style="font-size:10px;line-height:1.3">Спецификация оборудования,<br>изделий и материалов</td>
+        </tr>
+        <!-- Строка 6: пустая -->
+        <tr>
+          <td colspan="6" style="height:20px"></td>
+          <td colspan="3" rowspan="2" class="p"><input id="xSys" placeholder="(9) Наименование системы" style="text-align:center;font-size:10px"></td>
+        </tr>
+        <!-- Строка 7: Н. контр. -->
+        <tr>
+          <td class="l">Н. контр.</td>
+          <td class="c"><input id="xNrm" placeholder=""></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="c"><input id="xNrmD" placeholder="04.26" style="width:40px"></td>
+        </tr>
+        <!-- Строка 8: Утв. -->
+        <tr>
+          <td class="l">Утв.</td>
+          <td class="c"><input id="xApp" placeholder=""></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td class="c"><input id="xAppD" placeholder="04.26" style="width:40px"></td>
+          <td colspan="4"></td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let items=[],_st=null,_sec=null;
+const GRP=["Оборудование","Изделия","Материалы"];
+const ORD={Оборудование:0,Изделия:1,Материалы:2};
+
+/* ── INIT ── */
+(async()=>{
+  document.getElementById('sDate').textContent=new Date().toLocaleDateString('ru-RU');
+  try{const r=await fetch('/api/sections');_sec=await r.json();
+    ['sSec','mSec'].forEach(id=>{const s=document.getElementById(id);if(!s)return;
+      _sec.forEach(d=>{const o=document.createElement('option');o.value=d.code;o.textContent=d.name.slice(0,50);s.appendChild(o)})})}catch(e){}
+})();
+
+async function loadSGrp(){const sec=document.getElementById('sSec').value;
+  const s=document.getElementById('sGrp');s.innerHTML='<option value="">Группа</option>';
+  if(!sec)return;
+  try{const r=await fetch('/api/groups?section='+sec);const d=await r.json();
+    d.forEach(g=>{const o=document.createElement('option');o.value=g.code;o.textContent=g.code+' — '+g.name.slice(0,35);s.appendChild(o)})}catch(e){}}
+
+/* ── CATALOG DROPDOWN ── */
+let _subData=[],_subFiltered=[];
+async function loadSub(){
+  const sec=document.getElementById('sSec').value,grp=document.getElementById('sGrp').value;
+  document.getElementById('sSubQ').value='';
+  _subData=[];_subFiltered=[];
+  closeCat();
+  const prefix=grp||sec;if(!prefix)return;
+  try{const r=await fetch('/api/search?q=&section='+(grp?'':''+sec)+'&group='+grp+'&limit=200');
+    _subData=await r.json();_subFiltered=_subData}catch(e){}}
+
+function toggleCat(){const dd=document.getElementById('catDrop');
+  if(dd.classList.contains('open')){closeCat();return}
+  if(!_subData.length&&!document.getElementById('sSec').value){
+    showToast('Сначала выберите Раздел');return}
+  if(!_subData.length){showToast('Выберите Раздел и/или Группу');return}
+  renderCat();posCat();dd.classList.add('open')}
+
+function posCat(){const inp=document.getElementById('sSubQ'),dd=document.getElementById('catDrop');
+  const r=inp.getBoundingClientRect();
+  const main=document.querySelector('.main');
+  const ml=main?main.getBoundingClientRect().left:20;
+  dd.style.top=(r.bottom+4)+'px';
+  dd.style.left=ml+'px'}
+
+function closeCat(){document.getElementById('catDrop').classList.remove('open')}
+
+function filterCat(){const q=document.getElementById('sSubQ').value.trim().toLowerCase();
+  if(!q){_subFiltered=_subData}else{
+    _subFiltered=_subData.filter(d=>(d.code+' '+d.name).toLowerCase().includes(q))}
+  renderCat();posCat();document.getElementById('catDrop').classList.add('open')}
+
+function canPick(d){
+  // Нельзя выбирать если нет единицы измерения
+  if(!d.unit||!d.unit.trim())return false;
+  // Нельзя выбирать если код заканчивается на 0 (заголовок группы)
+  // Исключение: раздел 55 (551, 552...) — можно выбирать всё с ед.изм
+  const code=d.code||'';
+  if(code.startsWith('55'))return true;
+  if(code.endsWith('00'))return false;
+  return true}
+
+function renderCat(){const dd=document.getElementById('catDrop');
+  if(!_subFiltered.length){dd.innerHTML='<div class="cat-nil">Нет позиций</div>';return}
+  dd.innerHTML=_subFiltered.map(d=>{
+    if(!canPick(d)){
+      return '<div class="cat-item head"><span class="ci-code">'+esc(d.code)+'</span><span class="ci-name">'+esc(d.name)+'</span></div>'}
+    return '<div class="cat-item" onmousedown="pickCat(\''+esc(d.code)+'\')"><span class="ci-code">'+esc(d.code)+'</span><span class="ci-name">'+esc(d.name)+'</span><span class="ci-unit">'+esc(d.unit)+'</span></div>'
+  }).join('')}
+
+async function pickCat(code){closeCat();document.getElementById('sSubQ').value='';await pickItem(code)}
+
+document.addEventListener('click',e=>{const dd=document.getElementById('catDrop');
+  if(dd&&!dd.contains(e.target)&&e.target.id!=='sSubQ')closeCat()})
+
+/* ── SEARCH ── */
+function onSearch(){clearTimeout(_st);_st=setTimeout(doSearch,300)}
+async function doSearch(){
+  const q=document.getElementById('sQ').value.trim(),dd=document.getElementById('acDrop');
+  if(q.length<2){dd.classList.remove('open');return}
+  const sec=document.getElementById('sSec').value,grp=document.getElementById('sGrp').value;
+  try{const r=await fetch(`/api/search?q=${encodeURIComponent(q)}&section=${sec}&group=${grp}&limit=12`);
+    const d=await r.json();showAc(d)}catch(e){}}
+
+function showAc(data){const dd=document.getElementById('acDrop');
+  if(!data.length){dd.innerHTML='<div style="padding:12px;text-align:center;color:var(--g400);font-size:12px">Нет результатов</div>';dd.classList.add('open');return}
+  dd.innerHTML=data.map(it=>`<div class="ac-r" onmousedown="pickItem('${esc(it.code)}')">
+    <span class="ac-code">${esc(it.code)}</span>
+    <div style="flex:1"><div class="ac-nm">${esc(it.name)}</div>
+    <div class="ac-mt">${esc(it.unit||'—')}${it.standard?' · '+esc(it.standard):''}</div></div>
+    ${it.price_estimated?'<span style="font:700 11px var(--font);color:var(--sec)">'+fmt(it.price_estimated)+' ₸</span>':''}
+  </div>`).join('');dd.classList.add('open')}
+
+document.getElementById('sQ').addEventListener('blur',()=>setTimeout(()=>document.getElementById('acDrop').classList.remove('open'),200));
+
+/* ── ADD ITEM ── */
+async function pickItem(code){
+  document.getElementById('acDrop').classList.remove('open');
+  document.getElementById('sQ').value='';
+  const gt=document.getElementById('sType').value;
+  const item={id:Date.now(),group_type:gt,name:'',type_mark:'',agsk_code:code,manufacturer:'',unit:'шт',qty:1,weight:'',note:''};
+  try{const r=await fetch('/api/context?code='+encodeURIComponent(code));const ctx=await r.json();
+    item.name=ctx.col2_name||'';item.type_mark=ctx.col3_type||'';item.unit=ctx.unit||'шт'}catch(e){}
+  items.push(item);render();showToast('Добавлено: '+item.name.slice(0,50))}
+
+function rmItem(i){items.splice(i,1);render()}
+function chgQty(i,d){items[i].qty=Math.max(0,(items[i].qty||0)+d);render()}
+
+/* ── RENDER ── */
+function render(){
+  const a=document.getElementById('area');upStats();
+  if(!items.length){a.innerHTML='<div class="empty">Спецификация пуста. Введите наименование оборудования в строке поиска выше.</div>';return}
+  const groups={};
+  items.forEach((it,i)=>{const g=it.group_type||"Оборудование";if(!groups[g])groups[g]=[];groups[g].push({...it,_i:i})});
+  const sg=Object.keys(groups).sort((a,b)=>(ORD[a]||99)-(ORD[b]||99));
+  let p=0,h='';
+  sg.forEach(grp=>{
+    h+=`<div class="group-hd">${grp} (${groups[grp].length})</div>
+    <table class="items"><thead><tr>
+      <th class="c-pos">№</th><th>Ст.2 Наименование</th><th>Ст.3 Тип, марка</th><th>Ст.4 Код АГСК-3</th><th>Ст.5 Завод</th><th class="c-unit">Ед.</th><th class="c-qty">Кол-во</th><th class="c-act"></th>
+    </tr></thead><tbody>`;
+    groups[grp].forEach(it=>{p++;const i=it._i;
+      h+=`<tr>
+        <td class="c-pos">${p}</td>
+        <td class="c-name">${esc(it.name)}</td>
+        <td>${esc(it.type_mark)}</td>
+        <td class="c-mark">${esc(it.agsk_code)}</td>
+        <td class="c-brand">${esc(it.manufacturer)}</td>
+        <td class="c-unit">${esc(it.unit)}</td>
+        <td class="c-qty"><div class="qty-i">
+          <button onclick="chgQty(${i},-1)">−</button>
+          <input class="qty-n" type="number" min="0" value="${it.qty}" oninput="items[${i}].qty=+this.value||0;upStats()">
+          <button onclick="chgQty(${i},1)">+</button>
+        </div></td>
+        <td class="c-act"><button class="del" onclick="rmItem(${i})">✕</button></td>
+      </tr>`});
+    h+=`</tbody></table>`});
+  a.innerHTML=h}
+
+/* ── STATS ── */
+function upStats(){const n=items.length;
+  document.getElementById('sCnt').textContent=n;document.getElementById('tCnt').textContent=n;
+  document.getElementById('sEq').textContent=items.filter(i=>i.group_type==='Оборудование').length;
+  document.getElementById('bGen').disabled=!n;document.getElementById('bClr').disabled=!n}
+
+/* ── EXPORT ── */
+async function genSpec(){if(!items.length)return;
+  const b=document.getElementById('bGen');b.disabled=true;b.textContent='Формирую…';
+  const pay={stamp:{
+    code:document.getElementById('xCode').value,name:document.getElementById('xName').value,
+    system:document.getElementById('xSys').value,stage:document.getElementById('xStg').value,
+    sheet:document.getElementById('xSh').value,sheets:document.getElementById('xShT').value,
+    developer:document.getElementById('xDev').value,dev_date:document.getElementById('xDevD').value,
+    checker:document.getElementById('xChk').value,check_date:document.getElementById('xChkD').value,
+    norm_ctrl:document.getElementById('xNrm').value,norm_date:document.getElementById('xNrmD').value,
+    approver:document.getElementById('xApp').value,appr_date:document.getElementById('xAppD').value},
+    items:items.map(it=>({group_type:it.group_type,name:it.name,type_mark:it.type_mark,
+      agsk_code:it.agsk_code,manufacturer:it.manufacturer,unit:it.unit,qty:it.qty,weight:it.weight,note:it.note}))};
+  try{const r=await fetch('/api/export/gost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pay)});
+    if(!r.ok)throw 0;const bl=await r.blob();const u=URL.createObjectURL(bl);const a=document.createElement('a');
+    a.href=u;a.download=`АГСК3_Спец_${document.getElementById('xCode').value||'spec'}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    a.click();URL.revokeObjectURL(u);showToast('Спецификация ГОСТ 21.110 сформирована');
+    document.querySelectorAll('.ps').forEach(e=>e.classList.remove('on'));document.getElementById('ps2').classList.add('on')}
+  catch(e){showToast('Ошибка формирования')}
+  finally{b.disabled=false;b.textContent='Сформировать спецификацию'}}
+
+function clearAll(){if(!items.length||!confirm('Очистить всю спецификацию?'))return;items=[];render();
+  document.querySelectorAll('.ps').forEach(e=>e.classList.remove('on'));document.getElementById('ps1').classList.add('on')}
+
+/* ── HELPERS ── */
+function fmt(n){return n==null?'':Number(n).toLocaleString('ru-RU',{maximumFractionDigits:2})}
+function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'):''}
+let _tt;function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3000)}
+</script>
+</body>
+</html>
