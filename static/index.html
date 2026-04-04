@@ -36,7 +36,9 @@ body{font-family:var(--font);background:var(--g100);color:var(--g800);min-height
 /* ── LAYOUT ── */
 .layout{display:flex;flex:1;overflow:hidden}
 .sidebar{width:260px;flex-shrink:0;background:var(--white);border-right:1px solid var(--g200);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-.main{flex:1;overflow-y:auto;padding:20px 28px 40px}
+.main{flex:1;overflow-y:auto;padding:0}
+.search-sticky{position:sticky;top:0;z-index:100;background:var(--g100);padding:16px 28px 0;border-bottom:1px solid var(--g200)}
+.items-area{padding:16px 28px 40px}
 
 /* ── SIDEBAR ── */
 .sb-hd{font:700 10px/1 var(--font);text-transform:uppercase;letter-spacing:.6px;color:var(--g400);margin-bottom:8px}
@@ -181,7 +183,8 @@ table.items tr:hover{background:var(--g50)}
   <!-- MAIN -->
   <div class="main">
 
-    <!-- SEARCH: верхняя строка — поиск + тип -->
+    <!-- SEARCH (sticky) -->
+    <div class="search-sticky">
     <div class="search-row" style="margin-bottom:8px">
       <svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="sQ" type="text" placeholder="Искать в каталоге АГСК-3 и добавить в спецификацию..." oninput="onSearch()" autocomplete="off" style="flex:1">
@@ -197,9 +200,10 @@ table.items tr:hover{background:var(--g50)}
         <div class="cat-drop" id="catDrop"></div>
       </div>
     </div>
+    </div><!-- /search-sticky -->
 
     <!-- ITEMS -->
-    <div id="area">
+    <div id="area" class="items-area">
       <div class="empty">Спецификация пуста. Введите наименование оборудования в строке поиска выше.</div>
     </div>
 
@@ -385,4 +389,3 @@ let _tt;function showToast(m){const t=document.getElementById('toast');t.textCon
 </script>
 </body>
 </html>
-<!-- v2 -->
