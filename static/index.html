@@ -387,5 +387,108 @@ function fmt(n){return n==null?'':Number(n).toLocaleString('ru-RU',{maximumFract
 function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'):''}
 let _tt;function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3000)}
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- REGISTRATION MODAL — captures email + name on first visit  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<style>
+.reg-overlay{position:fixed;inset:0;background:rgba(15,23,42,.75);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;animation:regFadeIn 200ms ease-out}
+.reg-overlay.show{display:flex}
+@keyframes regFadeIn{from{opacity:0}to{opacity:1}}
+.reg-modal{background:var(--white,#fff);border-radius:var(--radius,8px);padding:32px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:regSlideUp 250ms ease-out}
+@keyframes regSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.reg-title{font:700 20px/1.3 var(--font,'Inter',sans-serif);color:var(--g900,#0F172A);margin-bottom:8px}
+.reg-subtitle{font:400 14px/1.5 var(--font,'Inter',sans-serif);color:var(--g500,#64748B);margin-bottom:24px}
+.reg-field{margin-bottom:16px}
+.reg-label{display:block;font:500 13px/1 var(--font,'Inter',sans-serif);color:var(--g700,#334155);margin-bottom:6px}
+.reg-input{width:100%;padding:10px 12px;border:1px solid var(--g200,#E2E8F0);border-radius:var(--radius,8px);font:400 14px/1.2 var(--font,'Inter',sans-serif);color:var(--g900,#0F172A);transition:border-color 150ms ease;background:var(--white,#fff)}
+.reg-input:focus{outline:none;border-color:var(--pri,#1E40AF);box-shadow:0 0 0 3px var(--pri-l,#DBEAFE)}
+.reg-btn{width:100%;padding:12px;background:var(--pri,#1E40AF);color:var(--white,#fff);border:none;border-radius:var(--radius,8px);font:600 14px/1 var(--font,'Inter',sans-serif);cursor:pointer;transition:background 150ms ease;margin-top:8px}
+.reg-btn:hover{background:var(--pri-h,#1E3A8A)}
+.reg-btn:disabled{opacity:.6;cursor:not-allowed}
+.reg-error{font:500 13px/1.4 var(--font,'Inter',sans-serif);color:var(--err,#DC2626);margin-bottom:12px;padding:8px 12px;background:var(--err-l,#FEE2E2);border-radius:var(--radius,8px);display:none}
+.reg-error.show{display:block}
+.reg-hint{font:400 12px/1.4 var(--font,'Inter',sans-serif);color:var(--g400,#94A3B8);margin-top:12px;text-align:center}
+</style>
+
+<div id="regOverlay" class="reg-overlay" role="dialog" aria-labelledby="regTitle" aria-modal="true">
+  <div class="reg-modal">
+    <div id="regTitle" class="reg-title">Добро пожаловать в АГСК-3</div>
+    <div class="reg-subtitle">Представьтесь, чтобы начать работу со спецификациями</div>
+    <div id="regError" class="reg-error" role="alert"></div>
+    <div class="reg-field">
+      <label class="reg-label" for="regName">Ваше имя</label>
+      <input class="reg-input" id="regName" type="text" placeholder="Иван Петров" autocomplete="name" maxlength="100">
+    </div>
+    <div class="reg-field">
+      <label class="reg-label" for="regEmail">Email</label>
+      <input class="reg-input" id="regEmail" type="email" placeholder="name@example.com" autocomplete="email" maxlength="320">
+    </div>
+    <button class="reg-btn" id="regSubmit" type="button">Продолжить</button>
+    <div class="reg-hint">Данные используются только для учёта использования</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  const overlay = document.getElementById('regOverlay');
+  const nameInput = document.getElementById('regName');
+  const emailInput = document.getElementById('regEmail');
+  const errorEl = document.getElementById('regError');
+  const submitBtn = document.getElementById('regSubmit');
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function showError(msg){errorEl.textContent=msg;errorEl.classList.add('show')}
+  function hideError(){errorEl.classList.remove('show')}
+  function showModal(){overlay.classList.add('show');setTimeout(()=>nameInput.focus(),100)}
+  function hideModal(){overlay.classList.remove('show')}
+
+  async function checkAuth(){
+    try {
+      const res = await fetch('/api/auth/check', {method:'POST', credentials:'include'});
+      if (res.ok) {
+        const data = await res.json();
+        window.AGSK_USER = data.user;
+        return true;
+      }
+    } catch (err) {}
+    return false;
+  }
+
+  async function submitRegistration(){
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    if (name.length < 2) return showError('Введите ваше имя');
+    if (!EMAIL_RE.test(email)) return showError('Некорректный email');
+    hideError();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Регистрация...';
+    try {
+      const res = await fetch('/api/auth/register', {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name, email}),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || data.detail?.error || 'Ошибка регистрации');
+      window.AGSK_USER = data.user;
+      hideModal();
+      window.dispatchEvent(new CustomEvent('agsk:registered', {detail: data.user}));
+    } catch (err) {
+      showError(err.message || 'Ошибка регистрации');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Продолжить';
+    }
+  }
+
+  submitBtn.addEventListener('click', submitRegistration);
+  [nameInput, emailInput].forEach(el => {
+    el.addEventListener('keypress', e => { if (e.key === 'Enter') submitRegistration() });
+    el.addEventListener('input', hideError);
+  });
+  checkAuth().then(ok => { if (!ok) showModal() });
+})();
+</script>
 </body>
 </html>

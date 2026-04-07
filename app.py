@@ -15,10 +15,14 @@ from urllib.parse import quote
 import httpx
 import openpyxl
 from openpyxl.styles import Font, Alignment
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query, Request, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+
+from auth_routes import auth_router
+from auth_middleware import require_user
+from track_events import track_event, EVENT_TYPES
 
 # ═══════════════════════════════════════════════════════════════════════════
 # CONFIG
@@ -38,6 +42,9 @@ STATIC_PATH = Path(__file__).parent / "static"
 
 app = FastAPI(title="АГСК-3 Рабочее место")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+# Registration / analytics routes — must be registered before static mount
+app.include_router(auth_router)
 
 # Supabase HTTP клиент
 _http = httpx.Client(
@@ -325,7 +332,10 @@ def _fill_stamp(ws, stamp: dict) -> None:
 
 
 @app.post("/api/export/gost")
-async def api_export_gost(request: Request):
+async def api_export_gost(
+    request: Request,
+    user: dict = Depends(require_user),
+):
     payload = await request.json()
     stamp = payload.get("stamp", {})
     items = payload.get("items", [])
@@ -389,6 +399,13 @@ async def api_export_gost(request: Request):
     safe_name = f"Spec_{date.today().isoformat()}.xlsx"
     utf_name = f"Spec_{proj}_{date.today().isoformat()}.xlsx"
     cd = f"attachment; filename=\"{safe_name}\"; filename*=UTF-8''{quote(utf_name)}"
+
+    # Track export event for analytics (fire-and-forget)
+    track_event(user["id"], EVENT_TYPES["SPEC_EXPORTED"], {
+        "items_count": len(items),
+        "project_code": stamp.get("code", ""),
+        "sheets": total_sheets,
+    })
 
     return StreamingResponse(
         buf,
