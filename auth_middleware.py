@@ -29,9 +29,15 @@ from fastapi import Request, HTTPException, status
 # ─────────────────────────────────────────────────────────────
 # Config (matches app.py pattern)
 # ─────────────────────────────────────────────────────────────
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://omykcphkzmmqpwswwfsw.supabase.co")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 AUTH_SECRET = os.getenv("AUTH_SECRET", "dev-only-change-me-in-production")
+
+if not SUPABASE_KEY:
+    raise RuntimeError(
+        "SUPABASE_KEY environment variable is required for auth_middleware. "
+        "Set it in Railway Variables."
+    )
 
 COOKIE_NAME = "agsk3_uid"
 COOKIE_MAX_AGE = 365 * 24 * 60 * 60  # 1 year (in seconds)
