@@ -25,7 +25,12 @@ from fastapi.middleware.cors import CORSMiddleware
 # ═══════════════════════════════════════════════════════════════════════════
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://omykcphkzmmqpwswwfsw.supabase.co")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9teWtjcGhrem1tcXB3c3d3ZnN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMTE5MTMsImV4cCI6MjA4MjY4NzkxM30.z7n0kGSNJSV4rJhxN5vDDd6qSKLsf54NhJ6ZOPeZ0iY")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+if not SUPABASE_KEY:
+    raise RuntimeError(
+        "SUPABASE_KEY environment variable is required. "
+        "Set it in Railway Variables (production) or .env (local)."
+    )
 
 TPL_FIRST = Path(__file__).parent / "tools" / "Шаблон" / "Шаблон Спецификации Первый лист.xlsx"
 TPL_NEXT  = Path(__file__).parent / "tools" / "Шаблон" / "Шаблон Спецификации Последующие листы (2,3,....).xlsx"
