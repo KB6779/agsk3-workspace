@@ -160,23 +160,17 @@ table.items tr:hover{background:var(--g50)}
         <div class="ps" id="ps3"><div class="ps-d"></div>Завершено</div>
       </div>
     </div>
-    <div>
-      <div class="sb-hd">Штамп спецификации</div>
-      <div class="sf"><label>Шифр проекта</label><input id="xCode" placeholder="2026-001-ИОС4"></div>
-      <div class="sf"><label>Наименование объекта</label><input id="xName" placeholder="Название объекта"></div>
-      <div class="sf"><label>Наименование системы</label><input id="xSys" placeholder="ОВиК, ВК, ЭС..."></div>
-      <div class="sf" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div><label>Стадия</label><input id="xStg" value="РП"></div>
-        <div><label>Лист / Листов</label><input id="xSh" value="1 / 1"></div>
-      </div>
-      <div class="sf"><label>Разработал</label>
-        <div style="display:grid;grid-template-columns:1fr 70px;gap:4px"><input id="xDev" placeholder="ФИО"><input id="xDevD" placeholder="04.26"></div></div>
-      <div class="sf"><label>Проверил</label>
-        <div style="display:grid;grid-template-columns:1fr 70px;gap:4px"><input id="xChk" placeholder="ФИО"><input id="xChkD" placeholder="04.26"></div></div>
-      <div class="sf"><label>Н. контроль</label>
-        <div style="display:grid;grid-template-columns:1fr 70px;gap:4px"><input id="xNrm" placeholder="ФИО"><input id="xNrmD" placeholder="04.26"></div></div>
-      <div class="sf"><label>Утвердил</label>
-        <div style="display:grid;grid-template-columns:1fr 70px;gap:4px"><input id="xApp" placeholder="ФИО"><input id="xAppD" placeholder="04.26"></div></div>
+    <!-- Stamp block removed from UI on 2026-04-07. Hidden inputs kept so existing export JS still works without changes. -->
+    <div style="display:none" aria-hidden="true">
+      <input id="xCode" value="">
+      <input id="xName" value="">
+      <input id="xSys" value="">
+      <input id="xStg" value="РП">
+      <input id="xSh" value="1 / 1">
+      <input id="xDev" value=""><input id="xDevD" value="">
+      <input id="xChk" value=""><input id="xChkD" value="">
+      <input id="xNrm" value=""><input id="xNrmD" value="">
+      <input id="xApp" value=""><input id="xAppD" value="">
     </div>
   </aside>
 
